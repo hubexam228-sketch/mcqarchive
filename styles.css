@@ -1,0 +1,45 @@
+:root{
+  --maxw: 900px;
+  --accent: #0b5cff;
+  --muted: #666;
+  --cardbg: #fff;
+  --bg: #f6f8fb;
+  --radius: 10px;
+}
+*{box-sizing:border-box}
+body{font-family: "Inter", system-ui, -apple-system, "Noto Sans Bengali", Roboto, Arial; margin:0; background:var(--bg); color:#111; line-height:1.4}
+.container{max-width:var(--maxw); margin:20px auto; padding:0 16px}
+.topbar{background:linear-gradient(90deg, #ffffff, #eef4ff); border-bottom:1px solid #e6eefc; padding:18px 0; margin-bottom:12px}
+.topbar h1{margin:0; font-size:1.25rem}
+.topbar .tagline{margin:6px 0 0; color:var(--muted); font-size:0.95rem}
+
+.controls{display:flex; gap:8px; margin-bottom:14px; align-items:center}
+.controls input[type="search"]{flex:1; padding:10px 12px; border-radius:8px; border:1px solid #d7e0f7; background:#fff}
+.controls select{padding:10px 12px; border-radius:8px; border:1px solid #d7e0f7; background:#fff}
+.controls button{padding:10px 12px; border-radius:8px; border:none; background:#ddd; cursor:pointer}
+
+.qcard{background:var(--cardbg); border-radius:var(--radius); padding:14px; margin-bottom:12px; box-shadow:0 6px 18px rgba(12,24,50,0.06)}
+.qmeta{display:flex; gap:8px; align-items:center; margin-bottom:6px}
+.qmeta .qid{background:#eef3ff; color:var(--accent); padding:6px 8px; border-radius:6px; font-weight:600}
+.qmeta .subject{color:var(--muted); font-size:0.9rem}
+.qtext{margin:6px 0 12px; font-size:1.05rem}
+
+.options{display:block; margin-bottom:12px}
+.opt{display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; border:1px solid transparent; margin-bottom:8px; cursor:pointer}
+.opt input{transform:scale(1.05)}
+.opt:hover{background:#fbfdff}
+.opt.correct{background: #e6fff1; border-color: #b8f0cf;}
+
+.actions{display:flex; gap:8px; margin-bottom:8px}
+.actions button{padding:8px 10px; border-radius:8px; border:none; cursor:pointer; background:#0b5cff; color:#fff}
+.actions button.revealBtn{background:#06a56b}
+
+.answer{background:#f7f9fc; padding:10px; border-radius:8px; border:1px solid #eef3ff}
+
+.empty{padding:20px; text-align:center; color:var(--muted)}
+.footer{margin-top:16px; text-align:center; color:var(--muted)}
+.error{color:crimson}
+@media (max-width:600px){
+  .controls{flex-direction:column; align-items:stretch}
+  .actions{flex-direction:column}
+}
