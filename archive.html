@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MCQ Archive — BCS / একাডেমিক</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container">
+      <h1>📚 MCQ Archive — BCS / একাডেমিক (বাংলা)</h1>
+      <p class="tagline">বিভিন্ন বিষয়ভিত্তিক প্রশ্ন, সার্চ ও উত্তর দেখুন</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <input id="searchInput" type="search" placeholder="প্রশ্ন খুঁজুন (কীওয়ার্ড / বিষয়)" />
+      <select id="filterSubject">
+        <option value="">সব বিষয়</option>
+      </select>
+      <button id="clearBtn">Clear</button>
+    </section>
+
+    <section id="questionsWrap">
+      <!-- প্রশ্নগুলো JavaScript দিয়ে এখানে লোড হবে -->
+    </section>
+
+    <div id="emptyMsg" class="empty" hidden>কোনো প্রশ্ন পাওয়া যাইনি।</div>
+
+    <footer class="footer">
+      <small>টেমপ্লেট — আপনি এটাকে কাস্টমাইজ করে নিতে পারেন।</small>
+    </footer>
+  </main>
+
+  <script>
+  // Simple client-side app (no build tools). Adjust as needed.
+
+  // Global vars
+  let QUESTIONS = [];
+  const questionsWrap = document.getElementById('questionsWrap');
+  const searchInput = document.getElementById('searchInput');
+  const filterSubject = document.getElementById('filterSubject');
+  const emptyMsg = document.getElementById('emptyMsg');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // Load questions.json (same-origin, works on GitHub Pages)
+  async function loadQuestions(){
+    try {
+      const res = await fetch('questions.json', {cache: "no-store"});
+      if(!res.ok) throw new Error('Failed to load questions.json');
+      QUESTIONS = await res.json();
+      populateSubjectFilter();
+      renderQuestions(QUESTIONS);
+    } catch (err) {
+      questionsWrap.innerHTML = '<p class="error">প্রশ্ন লোড করা যায়নি: ' + err.message + '</p>';
+    }
+  }
+
+  function populateSubjectFilter(){
+    const subjects = Array.from(new Set(QUESTIONS.map(q => q.subject || 'অন্যান্য')));
+    subjects.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = s;
+      filterSubject.appendChild(opt);
+    });
+  }
+
+  function renderQuestions(list){
+    questionsWrap.innerHTML = '';
+    if(!list.length){
+      emptyMsg.hidden = false;
+      return;
+    }
+    emptyMsg.hidden = true;
+    list.forEach(q => {
+      const card = document.createElement('article');
+      card.className = 'qcard';
+      card.innerHTML = `
+        <div class="qmeta">
+          <span class="qid">Q${q.id}</span>
+          <span class="subject">${q.subject || 'অন্যান্য'}</span>
+        </div>
+        <h3 class="qtext">${escapeHtml(q.question)}</h3>
+        <div class="options">
+          ${q.options.map((opt, i) => `
+            <label class="opt">
+              <input type="radio" name="q${q.id}" value="${i}">
+              <span class="opttext">${escapeHtml(opt)}</span>
+            </label>
+          `).join('')}
+        </div>
+        <div class="actions">
+          <button class="showAnswerBtn" data-id="${q.id}">উত্তর দেখুন</button>
+          <button class="revealBtn" data-id="${q.id}">সঠিকটি হাইলাইট করুন</button>
+        </div>
+        <div class="answer" id="answer-${q.id}" hidden>
+          <strong>সঠিক উত্তর:</strong> ${escapeHtml(q.options[q.answer])}
+        </div>
+      `;
+      questionsWrap.appendChild(card);
+
+      // Attach handlers
+      const showBtn = card.querySelector('.showAnswerBtn');
+      const revealBtn = card.querySelector('.revealBtn');
+      showBtn.addEventListener('click', () => {
+        const ans = card.querySelector('.answer');
+        ans.hidden = !ans.hidden;
+        showBtn.textContent = ans.hidden ? 'উত্তর দেখুন' : 'উত্তর লুকান';
+      });
+      revealBtn.addEventListener('click', () => {
+        // highlight correct option
+        const opts = card.querySelectorAll('.opt');
+        opts.forEach((label, idx) => {
+          label.classList.toggle('correct', idx === q.answer);
+        });
+        // scroll to card a bit
+        card.scrollIntoView({behavior: 'smooth', block: 'center'});
+      });
+    });
+  }
+
+  // Search + filter
+  function applyFilters(){
+    const kw = searchInput.value.trim().toLowerCase();
+    const subj = filterSubject.value;
+    const filtered = QUESTIONS.filter(q => {
+      const inSubject = subj ? (q.subject === subj) : true;
+      const inText = kw ? (q.question.toLowerCase().includes(kw) ||
+                           q.options.join(' ').toLowerCase().includes(kw)) : true;
+      return inSubject && inText;
+    });
+    renderQuestions(filtered);
+  }
+
+  // Escape HTML for safety
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll('&','&amp;')
+      .replaceAll('<','&lt;')
+      .replaceAll('>','&gt;')
+      .replaceAll('"','&quot;')
+      .replaceAll("'",'&#39;');
+  }
+
+  // Events
+  searchInput.addEventListener('input', () => applyFilters());
+  filterSubject.addEventListener('change', () => applyFilters());
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    filterSubject.value = '';
+    applyFilters();
+  });
+
+  // Init
+  loadQuestions();
+  </script>
+</body>
+</html>
